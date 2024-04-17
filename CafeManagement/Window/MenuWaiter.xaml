@@ -1,0 +1,33 @@
+﻿<Window x:Class="CafeManagement.Window.MenuWaiter"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CafeManagement.Window"
+         mc:Ignorable="d"
+      Title="Меню администартора" Height="515" Width="521" FontSize="20"  WindowStartupLocation="CenterScreen" Background="#FF8CFD93 ">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="217*"/>
+            <RowDefinition Height="230*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="15,0,12,9" Grid.RowSpan="2">
+            <StackPanel Orientation="Horizontal" Width="377" >
+                <Label/>
+                <Image Source="/images/free-icon-cafe-1223041.png" Height="60" Width="60"/>
+                <Label Content="Меню официанта" Margin="14,11,0,0" VerticalAlignment="Top" FontSize="32" Width="365"/>
+            </StackPanel>
+            <Label Height="37"/>
+            <StackPanel Width="450" Height="368" >
+                <Label x:Name="dolj" Content="Вы вошли как " HorizontalAlignment="Right"/>
+                <Label x:Name="name" Content="" HorizontalAlignment="Right"/>
+                <Button x:Name="Orders" Background="#FF5687FF " Click="Orders_Click" Height="45" Width="439">Заказы</Button>
+                <Label/>
+                <Button x:Name="Back" Background="#FF5687FF " Click="Back_Click" Height="31" Width="439">Вернуться</Button>
+                <Label/>
+                <Button x:Name="Exit" Background="#FF5687FF " Click="Exit_Click" Height="32" Width="441">Выход</Button>
+                <Label/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,63 @@
+﻿<Window x:Class="CafeManagement.Window.AddOrder"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CafeManagement.Window"
+         mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen" Title="Создание заказа" Height="717" Width="600"  FontSize="20">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FF8CFD93 " Width="580" Height="676">
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Номер столика</TextBlock>
+                <TextBox x:Name="Number" Width="300" Text="{Binding TableNumber}" />
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Количество клиентов</TextBlock>
+                <TextBox x:Name="QuantityClient" Width="300" Text="{Binding CustomerCount}"></TextBox>
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Блюдо</TextBlock>
+                <ComboBox x:Name="Diches" Width="300" SelectedValuePath="DishId">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                <Run Text="{Binding DishName}" />
+                <Run Text=" " />
+                <Run Text="{Binding Price}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230" Text="{Binding Quantity}">Количество</TextBlock>
+                <TextBox x:Name="Quantity" Width="300">
+                </TextBox>
+            </StackPanel>
+            <Label/>
+            <Button x:Name="AddDish" Background="#FF5687FF " Click="AddDish_Click_1" >Добавить блюдо в заказ</Button>
+            <Label/>
+            <StackPanel Orientation="Vertical" Height="381">
+                <TextBlock Width="574" TextAlignment="Center">Выбранные блюда:</TextBlock>
+                <Label x:Name="EmployeeId" Height="8"/>
+                <DataGrid x:Name="ordersListView" Height="338" Width="588" Background="{x:Null}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="№" Binding="{Binding Номер}" Width="80"/>
+                        <DataGridTextColumn Header="Блюдо" Binding="{Binding Блюдо}" Width="200"/>
+                        <DataGridTextColumn Header="Количество (шт.)" Binding="{Binding Количество}" Width="130"/>
+                        <DataGridTextColumn Header="Цена (руб.)" Binding="{Binding Цена}" Width="130"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+            <Button x:Name="Add" Click="Add_Click" Background="#FF5687FF " Width="534">Сохранить</Button>
+            <Label/>
+            <Button x:Name="Back" Click="Back_Click" Background="#FF5687FF " Width="537">Вернуться</Button>
+        </StackPanel>
+    </Grid>
+</Window>

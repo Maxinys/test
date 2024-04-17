@@ -1,0 +1,1373 @@
+скрипт бд
+CREATE DATABASE CafeManagement;
+USE CafeManagement;
+
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY AUTO_INCREMENT,
+    Username VARCHAR(50) NOT NULL,
+    Password VARCHAR(50) NOT NULL,
+    Role VARCHAR(20) NOT NULL
+);
+select * from Users;
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Status VARCHAR(20) NOT NULL,
+    UserID INT,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Shifts (
+    ShiftID INT PRIMARY KEY AUTO_INCREMENT,
+    ShiftType VARCHAR(50) NOT NULL,
+    StartTime DATETIME NOT NULL,
+    EndTime DATETIME NOT NULL
+);
+select*from Employees;
+
+CREATE TABLE ShiftEmployees (
+    ShiftEmployeeID INT PRIMARY KEY AUTO_INCREMENT,
+    ShiftID INT,
+    EmployeeID INT,
+    FOREIGN KEY (ShiftID) REFERENCES Shifts(ShiftID),
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+);
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY AUTO_INCREMENT,
+    TableNumber INT NOT NULL,
+    CustomerCount INT NOT NULL,
+    OrderStatus VARCHAR(20) NOT NULL,
+    ShiftID INT,
+    FOREIGN KEY (ShiftID) REFERENCES Shifts(ShiftID)
+);
+select*from Dishes;
+CREATE TABLE Dishes (
+    DishID INT PRIMARY KEY AUTO_INCREMENT,
+    DishName VARCHAR(50) NOT NULL,
+    Price DECIMAL(10, 2) NOT NULL,
+    Photo longblob
+);
+
+CREATE TABLE OrderDishes (
+    OrderDishID INT PRIMARY KEY AUTO_INCREMENT,
+    OrderID INT,
+    DishID INT,
+    Quantity INT NOT NULL,
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (DishID) REFERENCES Dishes(DishID)
+);
+-- Заполнение таблицы Users
+INSERT INTO Users (Username, Password, Role) VALUES
+('admin', 'admin123', 'Администратор'),
+('waiter1', 'waiterpass', 'Официант'),
+('waiter2', 'waiterpass', 'Официант'),
+('cook1', 'cookpass', 'Повар'),
+('cook2', 'cookpass', 'Повар'),
+('manager', 'managerpass', 'Администратор');
+
+-- Заполнение таблицы Employees
+INSERT INTO Employees (FirstName, LastName, Status, UserID) VALUES
+('Иван', 'Иванов', 'Работает', 1),
+('Петр', 'Петров', 'Работает', 2),
+('Анна', 'Сидорова', 'Работает', 3),
+('Екатерина', 'Кузнецова', 'Работает', 4),
+('Алексей', 'Алексеев', 'Работает', 5),
+('Ольга', 'Смирнова', 'Уволен', 6);
+
+-- Заполнение таблицы Shifts
+INSERT INTO Shifts (ShiftType, StartTime, EndTime) VALUES
+('Утренняя смена', '2024-02-26 08:00:00', '2024-02-26 16:00:00'),
+('Вечерняя смена', '2024-02-26 16:00:00', '2024-02-26 23:00:00'),
+('Ночная смена', '2024-02-27 23:00:00', '2024-02-27 08:00:00');
+
+-- Заполнение таблицы ShiftEmployees
+INSERT INTO ShiftEmployees (ShiftID, EmployeeID) VALUES
+(1, 1),
+(1, 2),
+(2, 3),
+(2, 4),
+(3, 5),
+(3, 6);
+
+-- Заполнение таблицы Orders
+INSERT INTO Orders (TableNumber, CustomerCount, OrderStatus, ShiftID) VALUES
+(1, 4, 'В обработке', 1),
+(2, 2, 'Оплачен', 1),
+(3, 3, 'В обработке', 2),
+(4, 5, 'Ожидание оплаты', 2),
+(5, 2, 'Готов', 3);
+
+-- Заполнение таблицы Dishes
+INSERT INTO Dishes (DishName, Price) VALUES
+('Борщ', 150.00),
+('Пельмени', 120.00),
+('Салат "Цезарь"', 180.00),
+('Пицца Маргарита', 220.00),
+('Стейк "Медальоны"', 320.00),
+('Чай черный', 50.00),
+('Кофе американо', 80.00),
+('Сок апельсиновый', 70.00),
+('Десерт "Тирамису"', 150.00),
+('Лимонад', 60.00);
+
+-- Заполнение таблицы OrderDishes
+INSERT INTO OrderDishes (OrderID, DishID, Quantity) VALUES
+(1, 1, 2),
+(1, 3, 1),
+(2, 4, 1),
+(3, 2, 3),
+(4, 5, 1),
+(5, 6, 2),
+(5, 7, 1),
+(5, 8, 3);
+
+Подключение
+
+Scaffold-DbContext "Server=localhost;User=root;Password=Ivan2004;Database=cafemanagement" "Pomelo.EntityFrameworkCore.MySql" -OutputDir "Model"
+
+
+Создаём папку Classes
+Класс AllData
+public static int ID;
+==========================================================
+
+В моделс 
+CafeManagementContext.cs
+
+ public static CafeManagementContext _context;
+    public CafeManagementContext()
+    {
+    }
+
+    public CafeManagementContext(DbContextOptions<CafeManagementContext> options)
+        : base(options)
+    {
+    }
+    public static CafeManagementContext GetContext()
+    {
+        if (_context == null) _context = new CafeManagementContext();
+        return _context;
+    }
+==============================================================================
+
+В моделс 
+User
+ public string FIO
+    {
+        get
+        {
+            Employee emp = App.context.Employees.ToList().Find(u => u.UserId == UserId);
+            return $"{emp.FirstName} {emp.LastName}";
+        }
+
+    }
+    public string Id
+    {
+        get
+        {
+            Employee emp = App.context.Employees.ToList().Find(u => u.UserId == UserId);
+            return $"{emp.EmployeeId}";
+        }
+
+    }
+    public string dolgnost
+    {
+        get
+        {
+            return $"{Role}";
+
+        }
+    }
+====================================================================================
+
+
+В App.xam.cs
+ public static CafeManagementContext context { get; } = new CafeManagementContext();
+=================================================
+
+Создаём папку виндовс
+
+Окно AddEmployeee.xaml
+XAML
+Title="Добавить сотрудника" Height="361" Width="600"  FontSize="20">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFE2E2" Width="580">
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Фамилия</TextBlock>
+                <TextBox x:Name="Surname" Width="300" Text="{Binding FirstName}" />
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Имя</TextBlock>
+                <TextBox x:Name="Name" Width="300" Text="{Binding LastName}"></TextBox>
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Роль</TextBlock>
+                <ComboBox x:Name="Role" Width="300" Text="{Binding User.Role}">
+                    <ComboBoxItem>Администратор</ComboBoxItem>
+                    <ComboBoxItem>Повар</ComboBoxItem>
+                    <ComboBoxItem>Официант</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Логин</TextBlock>
+                <TextBox x:Name="Username" Width="300" Text="{Binding User.Username}"></TextBox>
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Пароль</TextBlock>
+                <TextBox x:Name="Password" Width="300" Text="{Binding User.Password}"></TextBox>
+            </StackPanel>
+            <Label/>
+            <Button x:Name="Add" Click="Add_Click" Background="#FCBAD3" Width="534">Сохранить</Button>
+            <Label/>
+            <Button x:Name="Back" Click="Back_Click" Background="#FCBAD3" Width="537">Вернуться</Button>
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД
+ public partial class AddEmployeee : System.Windows.Window
+    {
+        public AddEmployeee()
+        {
+            InitializeComponent();
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Вы уверены, что хотите выйти? Новые данные не сохранятся.", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                UsersAdmin usersAdmin = new UsersAdmin();
+                usersAdmin.Show();
+                this.Close();
+            }
+        }
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+            User newUser = new User
+            {
+                Role = Role.Text,
+                Username = Username.Text,
+                Password = Password.Text,
+            };
+            CafeManagementContext context = CafeManagementContext.GetContext();
+            context.Users.Add(newUser);
+            context.SaveChanges();
+            Employee newEmployee = new Employee
+            {
+                FirstName = Surname.Text,
+                LastName = Name.Text,
+                Status = "Работает",
+                UserId = newUser.UserId,
+            };
+            context.Employees.Add(newEmployee);
+            context.SaveChanges();
+
+            MessageBox.Show("Успешно добавлено");
+            UsersAdmin usersAdmin = new UsersAdmin();
+            usersAdmin.Show();
+            this.Close();
+
+        }
+
+    }
+}
+========================================================================================================
+Окно AddOrder.xaml
+XAML
+Title="Создание заказа" Height="717" Width="600"  FontSize="20">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFE2E2" Width="580" Height="676">
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Номер столика</TextBlock>
+                <TextBox x:Name="Number" Width="300" Text="{Binding TableNumber}" />
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Количество клиентов</TextBlock>
+                <TextBox x:Name="QuantityClient" Width="300" Text="{Binding CustomerCount}"></TextBox>
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230">Блюдо</TextBlock>
+                <ComboBox x:Name="Diches" Width="300" SelectedValuePath="DishId">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                <Run Text="{Binding DishName}" />
+                <Run Text=" " />
+                <Run Text="{Binding Price}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="230" Text="{Binding Quantity}">Количество</TextBlock>
+                <TextBox x:Name="Quantity" Width="300">
+                </TextBox>
+            </StackPanel>
+            <Label/>
+            <Button x:Name="AddDish" Background="#FCBAD3" Click="AddDish_Click_1" >Добавить блюдо в заказ</Button>
+            <Label/>
+            <StackPanel Orientation="Vertical" Height="381">
+                <TextBlock Width="574" TextAlignment="Center">Выбранные блюда:</TextBlock>
+                <Label x:Name="EmployeeId" Height="8"/>
+                <DataGrid x:Name="ordersListView" Height="338" Width="588" Background="{x:Null}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="№" Binding="{Binding Номер}" Width="80"/>
+                        <DataGridTextColumn Header="Блюдо" Binding="{Binding Блюдо}" Width="200"/>
+                        <DataGridTextColumn Header="Количество" Binding="{Binding Количество}" Width="130"/>
+                        <DataGridTextColumn Header="Цена" Binding="{Binding Цена}" Width="130"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+            <Button x:Name="Add" Click="Add_Click" Background="#FCBAD3" Width="534">Сохранить</Button>
+            <Label/>
+            <Button x:Name="Back" Click="Back_Click" Background="#FCBAD3" Width="537">Вернуться</Button>
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД
+
+public partial class AddOrder : System.Windows.Window
+    {
+        private int dishCounter = 1;
+        private int? orderNumber;
+        public AddOrder()
+        {
+            InitializeComponent();
+
+            List<Dish> participantsList = App.context.Dishes.ToList();
+            Diches.ItemsSource = participantsList;
+            orderNumber = null;
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            OrdersWaiter ordersWaiter = new OrdersWaiter();
+            ordersWaiter.Show();
+            this.Close();
+        }
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Заказ успешно создан!", "Уведомление", MessageBoxButton.OK);
+            OrdersWaiter ordersWaiter = new OrdersWaiter();
+            ordersWaiter.Show();
+            this.Close();
+        }
+
+        private void AddDish_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(Diches.Text) || string.IsNullOrWhiteSpace(Quantity.Text) || string.IsNullOrWhiteSpace(Number.Text) || string.IsNullOrWhiteSpace(QuantityClient.Text))
+            {
+                MessageBox.Show("Пожалуйста, заполните все поля перед сохранением.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (orderNumber == null)
+            {
+                Order newOrder = new()
+                {
+                    OrderStatus = "Новый",
+                    ShiftId = 3,
+                    TableNumber = int.Parse(QuantityClient.Text),
+                    CustomerCount = int.Parse(QuantityClient.Text)
+                };
+
+                App.context.Orders.Add(newOrder);
+                App.context.SaveChanges();
+                orderNumber = newOrder.OrderId;
+                QuantityClient.IsEnabled = false;
+                Number.IsEnabled = false;
+            }
+            Dish selectedDish = Diches.SelectedItem as Dish;
+
+            if (selectedDish != null)
+            {
+                if (App.context.Orderdishes.Any(od => od.OrderId == orderNumber && od.DishId == selectedDish.DishId))
+                {
+                    MessageBox.Show("Это блюдо уже добавлено в заказ.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                Orderdish orderDish = new()
+                {
+                    OrderId = orderNumber,
+                    DishId = selectedDish.DishId,
+                    Quantity = int.Parse(Quantity.Text)
+                };
+
+                App.context.Orderdishes.Add(orderDish);
+                App.context.SaveChanges();
+
+                ordersListView.Items.Add(new
+                {
+                    Номер = dishCounter,
+                    Блюдо = selectedDish.DishName,
+                    Количество = orderDish.Quantity,
+                    Цена = selectedDish.Price
+                });
+
+                dishCounter++;
+                Diches.SelectedIndex = -1;
+                Quantity.Clear();
+            }
+        }
+    }
+}
+=================================================================================================================
+Окно Authorization.xaml
+XAML
+ Title="Авторизация" Height="498" Width="384" FontSize="20" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="338*"/>
+            <ColumnDefinition Width="31*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Background="#FFE2E2" Grid.ColumnSpan="2" Margin="15,0,0,0">
+            <Image Height="203" Width="194" Source="/Images/free-icon-cafe-1223041.png" />
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="80" >Логин:</TextBlock>
+                <Label/>
+                <TextBox x:Name="Login" Width="250" />
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="80">Пароль:</TextBlock>
+                <Label/>
+                <PasswordBox x:Name="Password" Visibility="Collapsed" Width="250" />
+                <TextBox x:Name="Password2" Visibility="Collapsed" Width="250" TextChanged="Password2_TextChanged"/>
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <Label Width="76"/>
+                <CheckBox x:Name="Safety" Checked="Safety_Checked" Unchecked="Safety_Unchecked">Показать/Скрыть пароль</CheckBox>
+            </StackPanel>
+            <Label/>
+            <Button x:Name="Enter" Background="#FCBAD3" Click="Enter_Click">Войти</Button>
+            <Label/>
+            <Button x:Name="Exit" Background="#FCBAD3" Click="Exit_Click">Выход</Button>
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД
+  public partial class Authorization : System.Windows.Window
+    {
+        public Authorization()
+        {
+            InitializeComponent();
+            Password.PasswordChanged += Password_PasswordChanged;
+            Password.Visibility = Visibility.Visible;
+            Password.Password = Password2.Text;
+        }
+        private void Password_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            Password2.Text = Password.Password;
+        }
+        private void GuestEnter_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+        private void Password2_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Password.Password = Password2.Text;
+        }
+        private void Safety_Checked(object sender, RoutedEventArgs e)
+        {
+            Password2.Visibility = Visibility.Visible;
+            Password.Visibility = Visibility.Collapsed;
+            Password2.Text = Password.Password;
+        }
+
+        private void Safety_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Password2.Visibility = Visibility.Collapsed;
+            Password.Visibility = Visibility.Visible;
+            Password.Password = Password2.Text;
+        }
+
+        private void Enter_Click(object sender, RoutedEventArgs e)
+        {
+            if (Login.Text.Length != 0 && Password.Password.Length != 0 && Password2.Text.Length != 0)
+            {
+                User user = App.context.Users.ToList().Find(u => u.Username == Login.Text && u.Password == Password.Password && u.Password == Password2.Text);
+
+                if (user != null)
+                {
+
+                    if (user.Role == "Администратор")
+                    {
+                        AllData.ID = user.UserId;
+                        MessageBox.Show($"Добро пожаловать, {user.dolgnost} {user.FIO} !");
+                        MenuAdmin adminMenu = new MenuAdmin();
+                        adminMenu.Show();
+                        this.Close();
+                        return;
+                    }
+                    else if (user.Role == "Повар")
+                    {
+                        AllData.ID = user.UserId;
+                        MessageBox.Show($"Добро пожаловать, {user.dolgnost} {user.FIO} !");
+                        MenuCook cookMenu = new MenuCook();
+                        cookMenu.Show();
+                        this.Close();
+                        return;
+                    }
+                    else if (user.Role == "Официант")
+                    {
+                        AllData.ID = user.UserId;
+                        MessageBox.Show($"Добро пожаловать, {user.dolgnost} {user.FIO} !");
+                        MenuWaiter waiterMenu = new MenuWaiter();
+                        waiterMenu.Show();
+                        this.Close();
+                        return;
+                    }
+                }
+
+                else
+                {
+                    MessageBox.Show("Вы ввели неверные данные!");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Вы должны заполнить все поля!");
+            }
+        }
+
+
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+    }
+===========================================================================================================================
+Окно MenuAdmin.xaml
+XAML
+ Title="Меню администартора" Height="515" Width="521" FontSize="20"  WindowStartupLocation="CenterScreen" Background="#FFE2E2">
+    <Grid>
+        <StackPanel Margin="15,0,12,9" Grid.RowSpan="2">
+            <StackPanel Orientation="Horizontal" Width="448" >
+                <Label/>
+                <Image Source="/images/free-icon-cafe-1223041.png" Height="60" Width="60"/>
+                <Label Content="Меню администратора" Margin="14,11,0,0" VerticalAlignment="Top" FontSize="32" Width="365"/>
+            </StackPanel>
+            <Label Height="37"/>
+            <StackPanel Width="450" Height="368" >
+                <Label x:Name="dolj" Content="Вы вошли как " HorizontalAlignment="Right"/>
+                <Label x:Name="name" Content="" HorizontalAlignment="Right"/>
+                <Button x:Name="Users" Background="#FCBAD3" Click="Users_Click" Height="45" Width="434">Сотрудники</Button>
+                <Label/>
+                <Button x:Name="Shifts" Background="#FCBAD3" Click="Shifts_Click" Height="45" Width="437">Смены</Button>
+                <Label/>
+                <Button x:Name="Orders" Background="#FCBAD3" Click="Orders_Click" Height="45" Width="439">Заказы</Button>
+                <Label Height="61"/>
+                <Button x:Name="Back" Background="#FCBAD3" Click="Back_Click" Height="31" Width="439">Вернуться</Button>
+                <Label/>
+                <Button x:Name="Exit" Background="#FCBAD3" Click="Exit_Click" Height="32" Width="441">Выход</Button>
+                <Label/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД
+
+public partial class MenuAdmin : System.Windows.Window
+    {
+        public MenuAdmin()
+        {
+            InitializeComponent();
+            if (AllData.ID != 0)
+            {
+                User user = App.context.Users.ToList().Find(u => u.UserId == AllData.ID);
+                name.Content = user.FIO;
+                dolj.Content = user.dolgnost;
+            }
+        }
+
+        private void Users_Click(object sender, RoutedEventArgs e)
+        {
+            UsersAdmin usersAdmin = new UsersAdmin();
+            usersAdmin.Show();
+            this.Close();
+        }
+
+        private void Shifts_Click(object sender, RoutedEventArgs e)
+        {
+            ShiftsAdmin shiftsAdmin = new ShiftsAdmin();
+            shiftsAdmin.Show();
+            this.Close();
+        }
+
+        private void Orders_Click(object sender, RoutedEventArgs e)
+        {
+            OrdersMenu ordersMenu = new OrdersMenu();
+            ordersMenu.Show();
+            this.Close();
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            Authorization authorization = new Authorization();
+            authorization.Show();
+            this.Close();
+        }
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+    }
+}
+=========================================================================================================================================================
+Окно MenuCook.xaml
+XAML
+ Title="Меню повара" Height="515" Width="521" FontSize="20"  WindowStartupLocation="CenterScreen" Background="#FFE2E2">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="217*"/>
+            <RowDefinition Height="230*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="15,0,12,9" Grid.RowSpan="2">
+            <StackPanel Orientation="Horizontal" Width="326" >
+                <Label/>
+                <Image Source="/images/free-icon-cafe-1223041.png" Height="60" Width="60"/>
+                <Label Content="Меню повара" Margin="14,11,0,0" VerticalAlignment="Top" FontSize="32" Width="365"/>
+            </StackPanel>
+            <Label Height="37"/>
+            <StackPanel Width="450" Height="368" >
+                <Label x:Name="dolj" Content="Вы вошли как " HorizontalAlignment="Right"/>
+                <Label x:Name="name" Content="" HorizontalAlignment="Right"/>
+                <Button x:Name="Orders" Background="#FCBAD3" Click="Orders_Click" Height="45" Width="434">Заказы</Button>
+                <Label Height="167"/>
+
+                <Button x:Name="Back" Background="#FCBAD3" Click="Back_Click" Height="31" Width="439">Вернуться</Button>
+                <Label/>
+                <Button x:Name="Exit" Background="#FCBAD3" Click="Exit_Click" Height="32" Width="441">Выход</Button>
+                <Label/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД
+
+ public partial class MenuCook : System.Windows.Window
+    {
+        public MenuCook()
+        {
+            InitializeComponent();
+            if (AllData.ID != 0)
+            {
+                User user = App.context.Users.ToList().Find(u => u.UserId == AllData.ID);
+                name.Content = user.FIO;
+                dolj.Content = user.dolgnost;
+            }
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            Authorization authorization = new Authorization();
+            authorization.Show();
+            this.Close();
+        }
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Orders_Click(object sender, RoutedEventArgs e)
+        {
+            OrdersCook ordersCook = new OrdersCook();
+            ordersCook.Show();
+            this.Close();
+        }
+    }
+}
+=====================================================================================================================================================
+Окно MenuWaiter.xaml
+XAML
+ Title="Меню администартора" Height="515" Width="521" FontSize="20"  WindowStartupLocation="CenterScreen" Background="#FFE2E2">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="217*"/>
+            <RowDefinition Height="230*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="15,0,12,9" Grid.RowSpan="2">
+            <StackPanel Orientation="Horizontal" Width="377" >
+                <Label/>
+                <Image Source="/images/free-icon-cafe-1223041.png" Height="60" Width="60"/>
+                <Label Content="Меню официанта" Margin="14,11,0,0" VerticalAlignment="Top" FontSize="32" Width="365"/>
+            </StackPanel>
+            <Label Height="37"/>
+            <StackPanel Width="450" Height="368" >
+                <Label x:Name="dolj" Content="Вы вошли как " HorizontalAlignment="Right"/>
+                <Label x:Name="name" Content="" HorizontalAlignment="Right"/>
+                <Button x:Name="Orders" Background="#FCBAD3" Click="Orders_Click" Height="45" Width="439">Заказы</Button>
+                <Label Height="164"/>
+                <Button x:Name="Back" Background="#FCBAD3" Click="Back_Click" Height="31" Width="439">Вернуться</Button>
+                <Label/>
+                <Button x:Name="Exit" Background="#FCBAD3" Click="Exit_Click" Height="32" Width="441">Выход</Button>
+                <Label/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД
+
+ public partial class MenuWaiter : System.Windows.Window
+    {
+        public MenuWaiter()
+        {
+            InitializeComponent();
+            if (AllData.ID != 0)
+            {
+                User user = App.context.Users.ToList().Find(u => u.UserId == AllData.ID);
+                name.Content = user.FIO;
+                dolj.Content = user.dolgnost;
+            }
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            Authorization authorization = new Authorization();
+            authorization.Show();
+            this.Close();
+        }
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Orders_Click(object sender, RoutedEventArgs e)
+        {
+            OrdersWaiter ordersWaiter = new OrdersWaiter();
+            ordersWaiter.Show();
+            this.Close();
+        }
+    }
+}
+=================================================================================================================================================================
+Окно OrdersCook.xaml
+XAML
+Title="Заказы" MinHeight="300" MinWidth="700" FontSize="20" Background="#FFE2E2" WindowStartupLocation="CenterScreen" Height="926" Width="1003" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="883" Width="884">
+            <Label x:Name="dolj" Content="Вы вошли как " HorizontalAlignment="Right"/>
+            <Label x:Name="name" Content="" HorizontalAlignment="Right"/>
+            <ListView x:Name="ordersListView" Height="663" AlternationCount="2" MouseUp="ordersListView_MouseUp">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Номер столика" DisplayMemberBinding="{Binding TableNumber}" />
+                        <GridViewColumn Header="Количество клиентов" DisplayMemberBinding="{Binding CustomerCount}" />
+                        <GridViewColumn Header="Статус заказа" DisplayMemberBinding="{Binding OrderStatus}" />
+                        <GridViewColumn Header="Блюда в заказе">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding DishList}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DishName}" Margin="5"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <Label Height="14"/>
+            <Button Content="Заказ готов" Background="#FCBAD3" Height="51" Click="MarkOrderAsReady_Click"/>
+            <Label Height="33"/>
+            <Button x:Name="back" Background="#FCBAD3" Click="back_Click" >Вернуться</Button>
+
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД
+
+ public partial class OrdersCook : System.Windows.Window
+    {
+        public OrdersCook()
+        {
+            InitializeComponent();
+            if (AllData.ID != 0)
+            {
+                User user = App.context.Users.ToList().Find(u => u.UserId == AllData.ID);
+                name.Content = user.FIO;
+                dolj.Content = user.dolgnost;
+            }
+            LoadOrders();
+        }
+        private void LoadOrders()
+        {
+            using (var dbContext = new CafeManagementContext())
+            {
+                var orders = dbContext.Orders
+                    .Include(o => o.Orderdishes)
+                        .ThenInclude(od => od.Dish)
+                    .ToList();
+
+                var orderData = orders.Select(order => new
+                {
+                    order.OrderId,
+                    order.TableNumber,
+                    order.CustomerCount,
+                    order.OrderStatus,
+                    DishList = order.Orderdishes.Select(od => new
+                    {
+                        DishName = od.Dish?.DishName
+                    }).ToList()
+                }).ToList();
+
+                ordersListView.ItemsSource = orderData;
+            }
+        }
+        private void MarkOrderAsReady_Click(object sender, RoutedEventArgs e)
+        {
+            if (ordersListView.SelectedItem != null)
+            {
+                var selectedOrder = (dynamic)ordersListView.SelectedItem;
+                int orderId = selectedOrder.OrderId; // Используем OrderId вместо TableNumber
+                UpdateOrderStatus(orderId, "Готов");
+                LoadOrders();
+            }
+        }
+
+        private void UpdateOrderStatus(int tableNumber, string newStatus)
+        {
+            using (var dbContext = new CafeManagementContext())
+            {
+                var orderToUpdate = dbContext.Orders.FirstOrDefault(o => o.OrderId == tableNumber);
+
+                if (orderToUpdate != null)
+                {
+                    orderToUpdate.OrderStatus = newStatus;
+                    dbContext.SaveChanges();
+                }
+            }
+        }
+
+        private void ordersListView_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (ordersListView.SelectedItem != null)
+            {
+                var selectedOrder = (dynamic)ordersListView.SelectedItem;
+                int orderId = selectedOrder.OrderId; // Используем OrderId вместо TableNumber
+
+                MessageBox.Show($"Выбран заказ с номером {orderId}!");
+            }
+        }
+
+        private void back_Click(object sender, RoutedEventArgs e)
+        {
+            MenuCook menuCook = new MenuCook();
+            menuCook.Show();
+            this.Close();
+        }
+    }
+}
+======================================================================================================================
+Окно OrdersMenu.xaml
+XAML
+ Title="Заказы" MinHeight="300" MinWidth="700" FontSize="20" Background="#FFE2E2" WindowStartupLocation="CenterScreen" Height="926" Width="1003">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="883" Width="884">
+            <Label x:Name="dolj" Content="Вы вошли как " HorizontalAlignment="Right"/>
+            <Label x:Name="name" Content="" HorizontalAlignment="Right"/>
+            <ListView x:Name="ordersListView" Height="745" AlternationCount="2">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Номер столика" DisplayMemberBinding="{Binding TableNumber}" />
+                        <GridViewColumn Header="Количество клиентов" DisplayMemberBinding="{Binding CustomerCount}" />
+                        <GridViewColumn Header="Статус заказа" DisplayMemberBinding="{Binding OrderStatus}" />
+                        <GridViewColumn Header="Блюда в заказе">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding DishList}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DishName}" Margin="5"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <Label Height="17"/>
+            <Button x:Name="back" Background="#FCBAD3" Click="back_Click">Вернуться</Button>
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД 
+
+ public partial class OrdersMenu : System.Windows.Window
+    {
+        public OrdersMenu()
+        {
+            InitializeComponent();
+            if (AllData.ID != 0)
+            {
+                User user = App.context.Users.ToList().Find(u => u.UserId == AllData.ID);
+                name.Content = user.FIO;
+                dolj.Content = user.dolgnost;
+            }
+            LoadOrders();
+        }
+        private void LoadOrders()
+        {
+            using (var dbContext = new CafeManagementContext())
+            {
+                var orders = dbContext.Orders
+                    .Include(o => o.Orderdishes)
+                        .ThenInclude(od => od.Dish)
+                    .ToList();
+
+                var orderData = orders.Select(order => new
+                {
+                    order.TableNumber,
+                    order.CustomerCount,
+                    order.OrderStatus,
+                    DishList = order.Orderdishes.Select(od => new
+                    {
+                        DishName = od.Dish?.DishName
+                    }).ToList()
+                }).ToList();
+
+                ordersListView.ItemsSource = orderData;
+            }
+        }
+
+        private void back_Click(object sender, RoutedEventArgs e)
+        {
+            MenuAdmin menuAdmin = new MenuAdmin();
+            menuAdmin.Show();
+            this.Close();
+        }
+    }
+}
+=====================================================================================================================
+Окно OrdersWaiter.xaml
+XAML
+ Title="Заказы" MinHeight="300" MinWidth="700" FontSize="20" Background="#FFE2E2" WindowStartupLocation="CenterScreen" Height="926" Width="1003" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="883" Width="884">
+            <StackPanel>
+                <Label x:Name="dolj" Content="Вы вошли как " HorizontalAlignment="Right"/>
+                <Label x:Name="name" Content="" HorizontalAlignment="Right"/>
+                <Button x:Name="AddOrder" Height="48" Width="246" HorizontalAlignment="Left" Background="#FCBAD3" Click="AddOrder_Click">+ Новый заказ</Button>
+            </StackPanel>
+            <Label/>
+            <ListView x:Name="ordersListView" Height="615" AlternationCount="2" MouseUp="ordersListView_MouseUp">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Номер столика" DisplayMemberBinding="{Binding TableNumber}" />
+                        <GridViewColumn Header="Количество клиентов" DisplayMemberBinding="{Binding CustomerCount}" />
+                        <GridViewColumn Header="Статус заказа" DisplayMemberBinding="{Binding OrderStatus}" />
+                        <GridViewColumn Header="Блюда в заказе">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding DishList}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DishName}" Margin="5"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <Label Height="14"/>
+            <Button Content="Заказ оплачен" Background="#FCBAD3" Height="51" Click="MarkOrderAsReady_Click"/>
+            <Label Height="33"/>
+            <Button x:Name="back" Background="#FCBAD3" Click="back_Click" >Вернуться</Button>
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД
+
+ public partial class OrdersWaiter : System.Windows.Window
+    {
+        public OrdersWaiter()
+        {
+            InitializeComponent();
+            if (AllData.ID != 0)
+            {
+                User user = App.context.Users.ToList().Find(u => u.UserId == AllData.ID);
+                name.Content = user.FIO;
+                dolj.Content = user.dolgnost;
+            }
+            LoadOrders();
+        }
+        private void LoadOrders()
+        {
+            using (var dbContext = new CafeManagementContext())
+            {
+                var orders = dbContext.Orders
+                    .Include(o => o.Orderdishes)
+                        .ThenInclude(od => od.Dish)
+                    .ToList();
+
+                var orderData = orders.Select(order => new
+                {
+                    order.OrderId,
+                    order.TableNumber,
+                    order.CustomerCount,
+                    order.OrderStatus,
+                    DishList = order.Orderdishes.Select(od => new
+                    {
+                        DishName = od.Dish?.DishName
+                    }).ToList()
+                }).ToList();
+
+                ordersListView.ItemsSource = orderData;
+            }
+        }
+        private void MarkOrderAsReady_Click(object sender, RoutedEventArgs e)
+        {
+            if (ordersListView.SelectedItem != null)
+            {
+                var selectedOrder = (dynamic)ordersListView.SelectedItem;
+                int orderId = selectedOrder.OrderId; // Используем OrderId вместо TableNumber
+                UpdateOrderStatus(orderId, "Оплачен");
+                LoadOrders();
+            }
+        }
+
+        private void UpdateOrderStatus(int tableNumber, string newStatus)
+        {
+            using (var dbContext = new CafeManagementContext())
+            {
+                var orderToUpdate = dbContext.Orders.FirstOrDefault(o => o.OrderId == tableNumber);
+
+                if (orderToUpdate != null)
+                {
+                    orderToUpdate.OrderStatus = newStatus;
+                    dbContext.SaveChanges();
+                }
+            }
+        }
+
+        private void ordersListView_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (ordersListView.SelectedItem != null)
+            {
+                var selectedOrder = (dynamic)ordersListView.SelectedItem;
+                int orderId = selectedOrder.OrderId; // Используем OrderId вместо TableNumber
+
+                MessageBox.Show($"Выбран заказ с номером {orderId}!");
+            }
+        }
+        private void back_Click(object sender, RoutedEventArgs e)
+        {
+            MenuCook menuCook = new MenuCook();
+            menuCook.Show();
+            this.Close();
+        }
+
+        private void AddOrder_Click(object sender, RoutedEventArgs e)
+        {
+            int newOrderNumber = GetNewOrderNumber();
+
+            AddOrder addorder = new AddOrder();
+            addorder.Show();
+            this.Close();
+        }
+
+        private int GetNewOrderNumber()
+        {
+            return 1;
+        }
+    }
+}
+=============================================================================================================
+Окно ShiftsAdmin.xaml
+XAML
+ Title="Cмены" MinHeight="300" MinWidth="700" FontSize="20" Background="#FFE2E2" WindowStartupLocation="CenterScreen" Height="926" Width="1003">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="883" Width="884">
+            <Label x:Name="dolj" Content="Вы вошли как " HorizontalAlignment="Right"/>
+            <Label x:Name="name" Content="" HorizontalAlignment="Right"/>
+            <StackPanel/>
+            <Label Height="34"/>
+            <DataGrid x:Name="shiftsDataGrid" CanUserAddRows="False" AutoGenerateColumns="False" SelectionMode="Single" Height="241" Width="690" SelectionChanged="shiftsDataGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Тип смены" Binding="{Binding ShiftType}" />
+                    <DataGridTextColumn Header="Начало" Binding="{Binding StartTime}" />
+                    <DataGridTextColumn Header="Окончание" Binding="{Binding EndTime}" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Width="685">
+                <Label Width="120">Смена:</Label>
+                <TextBlock x:Name="Shifts1" Width="563"/>
+            </StackPanel>
+            <Label/>
+            <DataGrid x:Name="employeesDataGrid" CanUserAddRows="False" AutoGenerateColumns="False" SelectionMode="Single" Height="289" SelectionChanged="employeesDataGrid_SelectionChanged" Width="687">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Имя" Binding="{Binding FirstName}" />
+                    <DataGridTextColumn Header="Фамилия" Binding="{Binding LastName}" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Orientation="Horizontal" Width="684">
+                <Label Width="132">Сотрудник:</Label>
+                <TextBlock x:Name="Emp" Width="214"/>
+            </StackPanel>
+            <Label/>
+            <Button Content="Назначить" Background="#FCBAD3" Click="AssignButton_Click"/>
+            <Label Height="17"/>
+            <Button x:Name="back" Background="#FCBAD3" Click="back_Click">Вернуться</Button>
+
+        </StackPanel>
+    </Grid>
+</Window>
+
+КОД 
+ public partial class ShiftsAdmin : System.Windows.Window
+    {
+        // Используйте List вместо ObservableCollection для простоты примера
+        public List<Shift> Shifts { get; set; } = new List<Shift>();
+        public List<Employee> Employees { get; set; } = new List<Employee>();
+
+        // Выбранные элементы
+        private Shift selectedShift;
+        private Employee selectedEmployee;
+
+        public ShiftsAdmin()
+        {
+            InitializeComponent();
+            if (AllData.ID != 0)
+            {
+                User user = App.context.Users.ToList().Find(u => u.UserId == AllData.ID);
+                name.Content = user.FIO;
+                dolj.Content = user.dolgnost;
+            }
+            shiftsDataGrid.ItemsSource = Shifts;
+            employeesDataGrid.ItemsSource = Employees;
+
+            LoadShifts();
+            LoadEmployees();
+        }
+
+        private void AssignButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectedShift == null)
+            {
+                MessageBox.Show("Выберите смену для назначения.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (selectedEmployee == null)
+            {
+                MessageBox.Show("Выберите сотрудника для назначения.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Проверка, что сотрудник не назначен на выбранную смену
+            if (IsEmployeeAssigned(selectedShift.ShiftId, selectedEmployee.EmployeeId))
+            {
+                MessageBox.Show($"Сотрудник {selectedEmployee.FirstName} {selectedEmployee.LastName} уже назначен на выбранную смену.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            Shiftemployee newAssignment = new Shiftemployee
+            {
+                ShiftId = selectedShift.ShiftId,
+                EmployeeId = selectedEmployee.EmployeeId
+            };
+
+            SaveAssignment(newAssignment);
+
+            LoadShifts();
+            LoadEmployees();
+
+            MessageBox.Show($"Сотрудник {selectedEmployee.FirstName} {selectedEmployee.LastName} успешно назначен на смену '{selectedShift.ShiftType}' с {selectedShift.StartTime} до {selectedShift.EndTime}.", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private bool IsEmployeeAssigned(int shiftId, int employeeId)
+        {
+            using (var dbContext = new CafeManagementContext())
+            {
+                return dbContext.Shiftemployees.Any(se => se.ShiftId == shiftId && se.EmployeeId == employeeId);
+            }
+        }
+
+
+        private void LoadShifts()
+        {
+            using (var dbContext = new CafeManagementContext())
+            {
+                Shifts.Clear();
+                var shifts = dbContext.Shifts.ToList();
+                foreach (var shift in shifts)
+                {
+                    Shifts.Add(shift);
+                }
+            }
+        }
+
+
+        private void LoadEmployees()
+        {
+            using (var dbContext = new CafeManagementContext())
+            {
+                var workingEmployees = dbContext.Employees.Where(employee => employee.Status == "Работает").ToList();
+                Employees.Clear();
+
+                foreach (var employee in workingEmployees)
+                {
+                    Employees.Add(employee);
+                }
+            }
+        }
+
+
+        private void shiftsDataGrid_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            selectedShift = shiftsDataGrid.SelectedItem as Shift;
+            Shifts1.Text = selectedShift != null ? $"{selectedShift.ShiftType} {selectedShift.StartTime} {selectedShift.EndTime}" : "";
+        }
+
+        private void employeesDataGrid_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            selectedEmployee = employeesDataGrid.SelectedItem as Employee;
+            Emp.Text = selectedEmployee != null ? $"{selectedEmployee.FirstName} {selectedEmployee.LastName}" : "";
+        }
+
+        private void SaveAssignment(Shiftemployee assignment)
+        {
+            using (var dbContext = new CafeManagementContext())
+            {
+                dbContext.Shiftemployees.Add(assignment);
+                dbContext.SaveChanges();
+            }
+        }
+
+        private void back_Click(object sender, RoutedEventArgs e)
+        {
+            MenuAdmin menuAdmin = new MenuAdmin();
+            menuAdmin.Show();
+            this.Close();
+        }
+    }
+}
+========================================================================================================================================================
+Окно UsersAdmin.xaml
+XAML
+ Title="Сотрудники" MinHeight="300" MinWidth="700" FontSize="20" Background="#FFE2E2" WindowStartupLocation="CenterScreen" Height="810" Width="1229">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="751" Width="1214">
+            <Label x:Name="dolj" Content="Вы вошли как " HorizontalAlignment="Right"/>
+            <Label x:Name="name" Content="" HorizontalAlignment="Right"/>
+            <StackPanel>
+                <Button x:Name="Add" Background="#FCBAD3" Click="Add_Click" Width="301" >+ Добавить нового сотрудника</Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Height="23">
+                <Label x:Name="RecordsCountLabel"/>
+                <Label x:Name="FilteredRecordsCountLabel"/>
+            </StackPanel>
+            <Label/>
+            <DataGrid x:Name="usersView" AutoGenerateColumns="False" Width="1084" Height="523" CanUserAddRows="False" MouseDoubleClick="usersView_MouseDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Номер сотрудника" Binding="{Binding EmployeeId}" />
+                    <DataGridTextColumn Header="Фамилия" Binding="{Binding FirstName}" />
+                    <DataGridTextColumn Header="Имя" Binding="{Binding LastName}" />
+                    <DataGridTextColumn Header="Роль" Binding="{Binding User.Role}" />
+                    <DataGridTextColumn Header="Статус" Binding="{Binding Status}" />
+                </DataGrid.Columns>
+
+            </DataGrid>
+            <Label Height="17"/>
+            <Button x:Name="back" Background="#FCBAD3" Click="back_Click">Вернуться</Button>
+
+        </StackPanel>
+    </Grid>
+</Window>
+
+
+ public partial class UsersAdmin : System.Windows.Window
+    {
+        private CafeManagementContext dbContext = new CafeManagementContext();
+        public List<Employee> Employees { get; set; } = new List<Employee>();
+        public UsersAdmin()
+        {
+            InitializeComponent();
+            if (AllData.ID != 0)
+            {
+                User user = App.context.Users.ToList().Find(u => u.UserId == AllData.ID);
+                name.Content = user.FIO;
+                dolj.Content = user.dolgnost;
+            }
+            Loadata();
+        }
+        public void Loadata()
+        {
+            List<Employee> tabularsections = dbContext.Employees.Include(t => t.User).ToList();
+            usersView.ItemsSource = tabularsections;
+        }
+        private void back_Click(object sender, RoutedEventArgs e)
+        {
+            MenuAdmin menuAdmin = new MenuAdmin();
+            menuAdmin.Show();
+            this.Close();
+        }
+
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+            AddEmployeee addEmployeee = new AddEmployeee();
+            addEmployeee.Show();
+            this.Close();
+        }
+
+        private void usersView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (usersView.SelectedItem != null)
+            {
+                Employee selectedEmployee = (Employee)usersView.SelectedItem;
+
+                // Отображение диалогового окна с вопросом
+                MessageBoxResult result = MessageBox.Show($"Вы действительно хотите сменить статус сотрудника {selectedEmployee.FirstName} {selectedEmployee.LastName} на 'Уволен'?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Если пользователь выбрал 'Да', меняем статус
+                    selectedEmployee.Status = "Уволен";
+                    dbContext.SaveChanges();
+                    Loadata();
+
+                    MessageBox.Show($"Статус сотрудника {selectedEmployee.FirstName} {selectedEmployee.LastName} изменен на 'Уволен'.", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,40 @@
+﻿<Window x:Class="CafeManagement.Window.Authorization"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CafeManagement.Window"
+        mc:Ignorable="d"
+        Title="Авторизация" Height="498" Width="384" FontSize="20" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="338*"/>
+            <ColumnDefinition Width="31*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Background="#FF8CFD93" Grid.ColumnSpan="2" Margin="15,0,0,0">
+            <Image Height="203" Width="194" Source="/Images/free-icon-cafe-1223041.png" />
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="80" >Логин:</TextBlock>
+                <Label/>
+                <TextBox x:Name="Login" Width="250" />
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Width="80">Пароль:</TextBlock>
+                <Label/>
+                <PasswordBox x:Name="Password" Visibility="Collapsed" Width="250" />
+                <TextBox x:Name="Password2" Visibility="Collapsed" Width="250" TextChanged="Password2_TextChanged"/>
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <Label Width="76"/>
+                <CheckBox x:Name="Safety" Checked="Safety_Checked" Unchecked="Safety_Unchecked">Показать/Скрыть пароль</CheckBox>
+            </StackPanel>
+            <Label/>
+            <Button x:Name="Enter" Background="#FF5687FF" Click="Enter_Click">Войти</Button>
+            <Label/>
+            <Button x:Name="Exit" Background="#FF5687FF" Click="Exit_Click">Выход</Button>
+        </StackPanel>
+    </Grid>
+</Window>
